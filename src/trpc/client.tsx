@@ -9,6 +9,14 @@ import { makeQueryClient } from "./query-client";
 import type { AppRouter } from "./routers/_app";
 export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>();
 let browserQueryClient: QueryClient;
+/**
+ * Provide an appropriate QueryClient for the current execution environment.
+ *
+ * On the server this returns a fresh QueryClient for each call. In the browser
+ * it returns a single shared QueryClient instance that is created once and reused.
+ *
+ * @returns A QueryClient instance suitable for the current environment
+ */
 function getQueryClient() {
   if (typeof window === "undefined") {
     // Server: always make a new query client
@@ -21,6 +29,11 @@ function getQueryClient() {
   if (!browserQueryClient) browserQueryClient = makeQueryClient();
   return browserQueryClient;
 }
+/**
+ * Compute the full TRPC API endpoint URL appropriate for the current runtime.
+ *
+ * @returns The TRPC endpoint URL: '/api/trpc' in the browser, `https://{VERCEL_URL}/api/trpc` when `VERCEL_URL` is set on the server, or `http://localhost:3000/api/trpc` as a local server fallback.
+ */
 function getUrl() {
   const base = (() => {
     if (typeof window !== "undefined") return "";
@@ -29,6 +42,14 @@ function getUrl() {
   })();
   return `${base}/api/trpc`;
 }
+/**
+ * Provides TRPC and React Query clients to the React component tree.
+ *
+ * The component supplies a stable TRPC client and an environment-appropriate QueryClient,
+ * then renders `props.children` inside a QueryClientProvider and TRPCProvider.
+ *
+ * @returns A React element that wraps `props.children` with a QueryClientProvider and a TRPCProvider configured for the current environment.
+ */
 export function TRPCReactProvider(
   props: Readonly<{
     children: React.ReactNode;
