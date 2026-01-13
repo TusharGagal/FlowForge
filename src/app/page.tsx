@@ -6,6 +6,15 @@ import { Client } from "./client";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 
+/**
+ * Server component that prefetches users, hydrates React Query state, and renders the client UI.
+ *
+ * Prefetches the `trpc.getUsers` query on the server and supplies its dehydrated state to the client via
+ * a HydrationBoundary. Renders the client-side `Client` component inside a `Suspense` boundary with a
+ * "Loading..." fallback, centered to fill the viewport.
+ *
+ * @returns A React element that centers a HydrationBoundary containing a Suspense-wrapped `Client` component; the Suspense fallback displays `"Loading..."`.
+ */
 export default async function Home() {
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(trpc.getUsers.queryOptions());
