@@ -1,30 +1,19 @@
 // import Sidebar from "@/components/Sidebar";
 // import { File } from "lucide-react";
 // import Link from "next/link";
-import { getQueryClient, trpc } from "@/trpc/server";
-import { Client } from "./client";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { Suspense } from "react";
 
-/**
- * Server component that prefetches users, hydrates React Query state, and renders the client UI.
- *
- * Prefetches the `trpc.getUsers` query on the server and supplies its dehydrated state to the client via
- * a HydrationBoundary. Renders the client-side `Client` component inside a `Suspense` boundary with a
- * "Loading..." fallback, centered to fill the viewport.
- *
- * @returns A React element that centers a HydrationBoundary containing a Suspense-wrapped `Client` component; the Suspense fallback displays `"Loading..."`.
- */
+import { caller } from "@/trpc/server";
+import { LogoutButton } from "./logout";
+import { requireAuth } from "@/lib/auth-utils";
+
 export default async function Home() {
-  const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(trpc.getUsers.queryOptions());
+  await requireAuth();
+  const data = await caller.getUsers();
   return (
-    <div className="min-h-screen min-w-screen flex items-center justify-center">
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Client />
-        </Suspense>
-      </HydrationBoundary>
+    <div className="min-h-screen min-w-screen flex items-center justify-center flex-col gap-y-6">
+      protected server component
+      <div>{JSON.stringify(data, null, 2)}</div>
+      <LogoutButton />
     </div>
 
     // <div className="flex h-screen">
