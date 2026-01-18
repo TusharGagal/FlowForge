@@ -37,7 +37,7 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 export const LoginForm = () => {
   const router = useRouter();
-
+  const [loading, setLoading] = React.useState(false);
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -65,11 +65,25 @@ export const LoginForm = () => {
       }
     );
   }
-  function handleGoogleAuth() {
-    signInGoogle();
+  async function handleGoogleAuth() {
+    setLoading(true);
+    try {
+      await signInGoogle();
+    } catch (error) {
+      toast.error("Failed to sign in with google");
+    } finally {
+      setLoading(false);
+    }
   }
-  function handleGithubAuth() {
-    signInGithub();
+  async function handleGithubAuth() {
+    setLoading(true);
+    try {
+      await signInGithub();
+    } catch (error) {
+      toast.error("Failed to sign in with github");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const submitting = form.formState.isSubmitting;

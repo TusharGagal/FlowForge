@@ -1,6 +1,6 @@
 import AuthLayout from "../features/auth/auth-layout";
-
-const layout = ({ children }: { children: React.ReactNode }) => {
+import { ReactNode } from "react";
+const layout = ({ children }: { children: ReactNode }) => {
   return <AuthLayout>{children}</AuthLayout>;
 };
 

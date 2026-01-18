@@ -43,6 +43,8 @@ type registerValues = z.infer<typeof registerSchema>;
 
 export const RegisterForm = () => {
   const router = useRouter();
+  const [loading, setLoading] = React.useState(false);
+
   const form = useForm<registerValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -71,11 +73,25 @@ export const RegisterForm = () => {
       }
     );
   }
-  function handleGoogleAuth() {
-    signInGoogle();
+  async function handleGoogleAuth() {
+    setLoading(true);
+    try {
+      await signInGoogle();
+    } catch (error) {
+      toast.error("Failed to sign in with google");
+    } finally {
+      setLoading(false);
+    }
   }
-  function handleGithubAuth() {
-    signInGithub();
+  async function handleGithubAuth() {
+    setLoading(true);
+    try {
+      await signInGithub();
+    } catch (error) {
+      toast.error("Failed to sign in with github");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const submitting = form.formState.isSubmitting;
