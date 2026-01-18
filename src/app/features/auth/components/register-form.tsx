@@ -23,9 +23,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
+import { authClient, signInGithub, signInGoogle } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Image from "next/image";
 
 const registerSchema = z
   .object({
@@ -70,6 +71,12 @@ export const RegisterForm = () => {
       }
     );
   }
+  function handleGoogleAuth() {
+    signInGoogle();
+  }
+  function handleGithubAuth() {
+    signInGithub();
+  }
 
   const submitting = form.formState.isSubmitting;
 
@@ -91,7 +98,14 @@ export const RegisterForm = () => {
               className="w-full"
               type="button"
               disabled={submitting}
+              onClick={handleGoogleAuth}
             >
+              <Image
+                src="/logos/google.svg"
+                alt="Google"
+                width={20}
+                height={20}
+              />
               Continue with Google
             </Button>
             <Button
@@ -99,7 +113,14 @@ export const RegisterForm = () => {
               className="w-full"
               type="button"
               disabled={submitting}
+              onClick={handleGithubAuth}
             >
+              <Image
+                src="/logos/github.svg"
+                alt="Github"
+                width={20}
+                height={20}
+              />
               Continue with Github
             </Button>
             <FormField

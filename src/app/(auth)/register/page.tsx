@@ -4,11 +4,7 @@ import { requireUnAuth } from "@/lib/auth-utils";
 
 const RegisterPage = async () => {
   await requireUnAuth();
-  return (
-    <main className="flex min-h-screen items-center justify-center px-4">
-      <RegisterForm />
-    </main>
-  );
+  return <RegisterForm />;
 };
 
 export default RegisterPage;
