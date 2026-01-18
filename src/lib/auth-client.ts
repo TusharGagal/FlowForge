@@ -17,7 +17,7 @@ export const signInGithub = async () => {
       provider: "github",
     });
   } catch (error) {
-    console.log("Google sign in failed:", error);
+    console.log("Github sign in failed:", error);
     throw error;
   }
 };
