@@ -23,9 +23,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
+import { authClient, signInGithub, signInGoogle } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Image from "next/image";
 
 const registerSchema = z
   .object({
@@ -42,6 +43,8 @@ type registerValues = z.infer<typeof registerSchema>;
 
 export const RegisterForm = () => {
   const router = useRouter();
+  const [loading, setLoading] = React.useState(false);
+
   const form = useForm<registerValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -70,6 +73,26 @@ export const RegisterForm = () => {
       }
     );
   }
+  async function handleGoogleAuth() {
+    setLoading(true);
+    try {
+      await signInGoogle();
+    } catch (error) {
+      toast.error("Failed to sign in with google");
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function handleGithubAuth() {
+    setLoading(true);
+    try {
+      await signInGithub();
+    } catch (error) {
+      toast.error("Failed to sign in with github");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const submitting = form.formState.isSubmitting;
 
@@ -91,7 +114,14 @@ export const RegisterForm = () => {
               className="w-full"
               type="button"
               disabled={submitting}
+              onClick={handleGoogleAuth}
             >
+              <Image
+                src="/logos/google.svg"
+                alt="Google"
+                width={20}
+                height={20}
+              />
               Continue with Google
             </Button>
             <Button
@@ -99,7 +129,14 @@ export const RegisterForm = () => {
               className="w-full"
               type="button"
               disabled={submitting}
+              onClick={handleGithubAuth}
             >
+              <Image
+                src="/logos/github.svg"
+                alt="Github"
+                width={20}
+                height={20}
+              />
               Continue with Github
             </Button>
             <FormField

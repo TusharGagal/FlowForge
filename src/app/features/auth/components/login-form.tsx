@@ -23,9 +23,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
+import { authClient, signInGithub, signInGoogle } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Image from "next/image";
 
 const loginSchema = z.object({
   email: z.email("Please enter a valid email address"),
@@ -36,7 +37,7 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 export const LoginForm = () => {
   const router = useRouter();
-
+  const [loading, setLoading] = React.useState(false);
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -64,6 +65,26 @@ export const LoginForm = () => {
       }
     );
   }
+  async function handleGoogleAuth() {
+    setLoading(true);
+    try {
+      await signInGoogle();
+    } catch (error) {
+      toast.error("Failed to sign in with google");
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function handleGithubAuth() {
+    setLoading(true);
+    try {
+      await signInGithub();
+    } catch (error) {
+      toast.error("Failed to sign in with github");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const submitting = form.formState.isSubmitting;
 
@@ -85,7 +106,14 @@ export const LoginForm = () => {
               className="w-full"
               type="button"
               disabled={submitting}
+              onClick={handleGoogleAuth}
             >
+              <Image
+                src="/logos/google.svg"
+                alt="Google"
+                width={20}
+                height={20}
+              />
               Continue with Google
             </Button>
             <Button
@@ -93,7 +121,14 @@ export const LoginForm = () => {
               className="w-full"
               type="button"
               disabled={submitting}
+              onClick={handleGithubAuth}
             >
+              <Image
+                src="/logos/github.svg"
+                alt="Github"
+                width={20}
+                height={20}
+              />
               Continue with Github
             </Button>
             <FormField
