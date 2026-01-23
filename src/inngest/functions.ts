@@ -17,16 +17,31 @@ export const testAI = inngest.createFunction(
       model:google("gemini-2.5-flash"),
       system:"You are helpful assistance.",
       prompt:"Write a vegetarian lasagna recipe for 4 people.",
+      experimental_telemetry: {
+        isEnabled: true,
+        recordInputs: true,
+        recordOutputs: true,
+      },
     })
     const {steps:openaiSteps}=await step.ai.wrap("openai-generate-text",generateText,{
       model:openai("gpt-4o"),
       system:"You are helpful assistance.",
       prompt:"Write a vegetarian lasagna recipe for 4 people.",
+      experimental_telemetry: {
+        isEnabled: true,
+        recordInputs: true,
+        recordOutputs: true,
+      },
     })
     const {steps:anthropicSteps}=await step.ai.wrap("antrhopic-generate-text",generateText,{
       model:anthropic("claude-sonnet-4-5"),
       system:"You are helpful assistance.",
       prompt:"Write a vegetarian lasagna recipe for 4 people.",
+      experimental_telemetry: {
+        isEnabled: true,
+        recordInputs: true,
+        recordOutputs: true,
+      },
     })
 
     
