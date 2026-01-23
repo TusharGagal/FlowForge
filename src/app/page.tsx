@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 // import Sidebar from "@/components/Sidebar";
 // import { File } from "lucide-react";
 // import Link from "next/link";
@@ -15,8 +15,14 @@ import { toast } from "sonner";
 export default function Home() {
   // await requireAuth();
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const { data } = useQuery(trpc.getWorkflows.queryOptions());
+
+  const testAI=useMutation(trpc.testAI.mutationOptions({
+    onSuccess: () => {
+      toast.message("AI Job queued")
+    },
+  }))
+
   const create = useMutation(
     trpc.createWorkflow.mutationOptions({
       onSuccess: () => {
@@ -28,6 +34,9 @@ export default function Home() {
     <div className="min-h-screen min-w-screen flex items-center justify-center flex-col gap-y-6">
       protected server component
       <div>{JSON.stringify(data, null, 2)}</div>
+      <Button disabled={testAI.isPending} onClick={() => testAI.mutate()}>
+        Test AI
+      </Button>
       <Button disabled={create.isPending} onClick={() => create.mutate()}>
         create workflow
       </Button>
