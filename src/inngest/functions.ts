@@ -33,7 +33,7 @@ export const testAI = inngest.createFunction(
         recordOutputs: true,
       },
     })
-    const {steps:anthropicSteps}=await step.ai.wrap("antrhopic-generate-text",generateText,{
+    const {steps:anthropicSteps}=await step.ai.wrap("anthropic-generate-text",generateText,{
       model:anthropic("claude-sonnet-4-5"),
       system:"You are helpful assistance.",
       prompt:"Write a vegetarian lasagna recipe for 4 people.",
