@@ -140,7 +140,7 @@ export const WorkflowItem = ({ data }: { data: workflows }) => {
                 <WorkflowIcon className="size-5 text-muted-foreground" />
             </div>}
             onRemove={handleRemove}
-            isRemoving={false}
+            isRemoving={removeWorkflow.isPending}
         />
     )
 }
