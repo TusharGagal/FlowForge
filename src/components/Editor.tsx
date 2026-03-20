@@ -59,6 +59,12 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
                 fitView
                 proOptions={{ hideAttribution: true }}
                 className="text-primary"
+                snapGrid={[10, 10]}
+                snapToGrid
+                panOnScroll
+                panOnDrag={false}
+                selectionOnDrag
+                deleteKeyCode='Delete'
             >
                 <Background />
                 <Controls />
