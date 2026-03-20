@@ -6,14 +6,34 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { SaveIcon } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import Link from "next/link"
-import { useSuspenseWorkflow, useUpdateWorkflowName } from "../hooks/useWorkflows"
+import { useSuspenseWorkflow, useUpdateWorkflow, useUpdateWorkflowName } from "../hooks/useWorkflows"
 import { useEffect, useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
+import { useReactFlow } from "@xyflow/react"
 
 export const EditorSavebutton = ({ workflowId }: { workflowId: string }) => {
+
+    const { getNodes, getEdges } = useReactFlow();
+    const saveWorkflow = useUpdateWorkflow();
+
+    const handleSave = () => {
+        const nodes = getNodes();
+        const edges = getEdges();
+        if (!nodes && !edges) {
+            return;
+        }
+
+        saveWorkflow.mutate({
+            id: workflowId,
+            nodes,
+            edges
+        })
+
+    }
+
     return (
         <div className="ml-auto">
-            <Button size="sm" onClick={() => { }} disabled={false}>
+            <Button size="sm" onClick={handleSave} disabled={saveWorkflow.isPending}>
                 <SaveIcon className="size-4" />
                 Save
             </Button>

@@ -3,6 +3,7 @@ import { prefetchWorkflow } from "@/app/features/workflows/server/prefetch";
 import { Editor, EditorError, EditorLoading } from "@/components/Editor";
 import { requireAuth } from "@/lib/auth-utils";
 import { HydrateClient } from "@/trpc/server";
+import { ReactFlowProvider } from "@xyflow/react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -21,10 +22,12 @@ const Page = async ({ params }: PageProps) => {
         <HydrateClient>
             <ErrorBoundary fallback={<EditorError />}>
                 <Suspense fallback={<EditorLoading />}>
-                    <EditorHeader workflowId={workflowId} />
-                    <main className="flex-1">
-                        <Editor workflowId={workflowId} />
-                    </main>
+                    <ReactFlowProvider>
+                        <EditorHeader workflowId={workflowId} />
+                        <main className="flex-1">
+                            <Editor workflowId={workflowId} />
+                        </main>
+                    </ReactFlowProvider>
                 </Suspense>
             </ErrorBoundary>
         </HydrateClient>

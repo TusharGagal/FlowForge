@@ -4,7 +4,7 @@ import { useCreateWorkflows, useRemoveWorkflows, useSuspenseWorkflows } from "..
 import { useRouter } from "next/navigation";
 import { useWorkflowsParams } from "../hooks/useWorkflows-params";
 import { useEntitySearch } from "@/hooks/use-entity-search";
-import type { workflows } from "@/generated/prisma/client"
+import type { Workflow } from "@/generated/prisma/client"
 import { WorkflowIcon } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 
@@ -121,7 +121,7 @@ export const WorkflowsEmpty = () => {
     )
 }
 
-export const WorkflowItem = ({ data }: { data: workflows }) => {
+export const WorkflowItem = ({ data }: { data: Workflow }) => {
     const removeWorkflow = useRemoveWorkflows();
     const handleRemove = () => {
         removeWorkflow.mutate({ id: data.id });
