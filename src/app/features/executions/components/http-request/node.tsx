@@ -33,7 +33,8 @@ export const HttpRequestNode = memo((props: NodeProps<HttpRequestNodeType>) => {
             }
 
             return node;
-        }))
+        }));
+        setDialogOpen(false);
     }
 
     const nodeStatus = "initial";

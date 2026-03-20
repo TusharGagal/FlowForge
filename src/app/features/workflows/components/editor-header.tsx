@@ -19,7 +19,7 @@ export const EditorSavebutton = ({ workflowId }: { workflowId: string }) => {
     const handleSave = () => {
         const nodes = getNodes();
         const edges = getEdges();
-        if (!nodes && !edges) {
+        if (nodes.length === 0 && edges.length === 0) {
             return;
         }
 

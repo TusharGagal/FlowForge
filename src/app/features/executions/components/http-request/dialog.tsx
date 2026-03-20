@@ -150,6 +150,7 @@ export const HttpRequestDialog = (
                                     <FormDescription>
                                         Static URL or use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects.
                                     </FormDescription>
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
@@ -160,13 +161,15 @@ export const HttpRequestDialog = (
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Request Body</FormLabel>
-                                        <Textarea
-                                            placeholder={
-                                                `{\n "userId":"{{httpsResponse.data.id}}", \n "name":"{{httpsResponse.data.name}}",\n "items":"{{httpResponse.data.items}}"\n}`
-                                            }
-                                            className="min-h-[120px] font-mono text-sm"
-                                            {...field}
-                                        />
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder={
+                                                    `{\n "userId":"{{httpsResponse.data.id}}", \n "name":"{{httpsResponse.data.name}}",\n "items":"{{httpResponse.data.items}}"\n}`
+                                                }
+                                                className="min-h-[120px] font-mono text-sm"
+                                                {...field}
+                                            />
+                                        </FormControl>
                                         <FormDescription>
                                             JSON with template variables. Use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects.
                                         </FormDescription>

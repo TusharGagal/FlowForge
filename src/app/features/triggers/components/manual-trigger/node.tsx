@@ -6,16 +6,16 @@ import { BaseTriggerNode } from "../base-trigger-node"
 import { ManualTriggerDialog } from "./dialog";
 
 export const ManualTriggerNode = memo((props: NodeProps) => {
-    const [dialogOpen, SetDialogOpen] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
     const nodeStatus = "initial";
 
     const handleOpenSettings = () => {
-        SetDialogOpen(true);
+        setDialogOpen(true);
     }
 
     return (
         <>
-            <ManualTriggerDialog open={dialogOpen} onOpenChange={SetDialogOpen} />
+            <ManualTriggerDialog open={dialogOpen} onOpenChange={setDialogOpen} />
             <BaseTriggerNode
                 {...props}
                 id={props.id}
