@@ -39,15 +39,13 @@ const formSchema = z.object({
     body: z.string().optional()
 })
 
-export type FormType = z.infer<typeof formSchema>;
+export type HttpRequestFormValues = z.infer<typeof formSchema>;
 
 interface props {
     open: boolean;
     onOpenChange: (open: boolean) => void
-    onSubmit: (values: FormType) => void;
-    defaultEndpoint?: string;
-    defaultMethod?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-    defaultBody?: string;
+    onSubmit: (values: HttpRequestFormValues) => void;
+    defaultValues?: Partial<HttpRequestFormValues>;
 }
 
 export const HttpRequestDialog = (
@@ -55,17 +53,15 @@ export const HttpRequestDialog = (
         open,
         onOpenChange,
         onSubmit,
-        defaultEndpoint = "",
-        defaultMethod = "GET",
-        defaultBody = ""
+        defaultValues = {},
     }: props) => {
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            endpoint: defaultEndpoint,
-            method: defaultMethod,
-            body: defaultBody,
+            endpoint: defaultValues.endpoint || "",
+            method: defaultValues.method || "GET",
+            body: defaultValues.body || "",
         }
 
     })
@@ -73,12 +69,12 @@ export const HttpRequestDialog = (
     useEffect(() => {
         if (open) {
             form.reset({
-                endpoint: defaultEndpoint,
-                method: defaultMethod,
-                body: defaultBody,  // TODO: bug if i am updaing the method type from post to get then body is not updating in the databse.
+                endpoint: defaultValues.endpoint || "",
+                method: defaultValues.method || "GET",
+                body: defaultValues.body || "",  // TODO: bug if i am updaing the method type from post to get then body is not updating in the databse.
             })
         }
-    }, [open, defaultEndpoint, defaultBody, defaultMethod, form])
+    }, [open, defaultValues, form])
 
     const watchMethod = useWatch({
         control: form.control,
