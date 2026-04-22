@@ -1,10 +1,18 @@
 import type { NodeExecutor } from "@/app/features/executions/types";
 import { NonRetriableError } from "inngest";
 import ky, { type Options as KyOptions } from "ky";
-type HttpRequestData = {
-    endpoint?: string;
-    method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+
+export type HttpRequestData = {
+    variableName: string,
+    endpoint: string;
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     body?: string;
+}
+
+const parseResponseData = async (response: Response) => {
+    const contentType = response.headers.get("content-type");
+    return contentType?.includes("application/json") ? await response.json() : await response.text();
 }
 
 export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
@@ -13,34 +21,57 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
     context,
     step,
 }) => {
-    // TODO: publish "loading" state for manual trigger
+    // TODO: publish "loading" state for HTTP request.
 
     if (!data.endpoint) {
         // TODO: publish "error" state for manual trigger
         throw new NonRetriableError("HTTP request node: No endpoint configured.")
     }
+    if (!data.variableName) {
+        // TODO: publish "error" state for manual trigger
+        throw new NonRetriableError("HTTP request node: Variable name not configured")
+    }
+    if (!data.method) {
+        // TODO: publish "error" state for manual trigger
+        throw new NonRetriableError("HTTP request node: Method not configured")
+    }
 
-    const result = await step.run("http-request", async () => {
+    const result = await step.run(`http-request-${nodeId}`, async () => {
         const method = data.method || "GET";
-        const endpoint = data.endpoint!;
+        const endpoint = data.endpoint;
         const options: KyOptions = { method };
 
         if (["POST", "PUT", "PATCH"].includes(method)) {
             options.body = data.body;
+            options.headers = {
+                "content-type": "application/json",
+            }
         }
+        options.throwHttpErrors = false;
+
         const response = await ky(endpoint, options);
-        const contentType = response.headers.get("content-type");
-        const responseData = contentType?.includes("application/json") ? await response.json() : await response.text();
+        const responseData = await parseResponseData(response);
 
+        if (!response.ok) {
+            const errorBody = typeof responseData === "string" ? responseData : JSON.stringify(responseData);
+            const errorBodyMessage = errorBody ? ` Response body: ${errorBody}` : "";
+            throw new Error(
+                `HTTP request node failed for ${method} ${endpoint}: ${response.status} ${response.statusText}.${errorBodyMessage}`,
+            );
+        }
 
-        return {
-            ...context,
+        const responsePayload = {
             httpResponse: {
                 status: response.status,
                 statusText: response.statusText,
                 data: responseData,
             }
         }
+        return {
+            ...context,
+            [data.variableName]: responsePayload,
+        }
+
     });
 
     // TODO: publish "success" state for manual trigger
