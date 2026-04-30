@@ -2,6 +2,7 @@ import type { NodeExecutor } from "@/app/features/executions/types";
 import { NonRetriableError } from "inngest";
 import ky, { type Options as KyOptions } from "ky";
 import Handlebars from "handlebars";
+import { httpRequestChannel } from "@/inngest/channels/httpRequestChannel";
 
 Handlebars.registerHelper("json", (context) => {
     const jsonString = JSON.stringify(context, null, 2);
@@ -27,62 +28,101 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
     nodeId,
     context,
     step,
+    publish
 }) => {
-    // TODO: publish "loading" state for HTTP request.
+
+    await publish(
+        httpRequestChannel().status({
+            nodeId,
+            status: "loading"
+        })
+    )
 
     if (!data.endpoint) {
-        // TODO: publish "error" state for manual trigger
+        await publish(
+            httpRequestChannel().status({
+                nodeId,
+                status: "error"
+            })
+        )
         throw new NonRetriableError("HTTP request node: No endpoint configured.")
     }
     if (!data.variableName) {
-        // TODO: publish "error" state for manual trigger
+        await publish(
+            httpRequestChannel().status({
+                nodeId,
+                status: "error"
+            })
+        )
         throw new NonRetriableError("HTTP request node: Variable name not configured")
     }
     if (!data.method) {
-        // TODO: publish "error" state for manual trigger
+        await publish(
+            httpRequestChannel().status({
+                nodeId,
+                status: "error"
+            })
+        )
         throw new NonRetriableError("HTTP request node: Method not configured")
     }
 
-    const result = await step.run(`http-request-${nodeId}`, async () => {
-        const method = data.method || "GET";
-        //   https://.../{{sampleapicall.httpresponse.data.userId}}
-        const endpoint = Handlebars.compile(data.endpoint)(context);
-        const options: KyOptions = { method };
+    try {
 
-        if (["POST", "PUT", "PATCH"].includes(method)) {
-            const resolved = Handlebars.compile(data.body || "{}")(context);
-            options.body = resolved;
-            options.headers = {
-                "content-type": "application/json",
+        const result = await step.run(`http-request-${nodeId}`, async () => {
+            const method = data.method || "GET";
+            //   https://.../{{sampleapicall.httpresponse.data.userId}}
+            const endpoint = Handlebars.compile(data.endpoint)(context);
+            const options: KyOptions = { method };
+
+            if (["POST", "PUT", "PATCH"].includes(method)) {
+                const resolved = Handlebars.compile(data.body || "{}")(context);
+                options.body = resolved;
+                options.headers = {
+                    "content-type": "application/json",
+                }
             }
-        }
-        options.throwHttpErrors = false;
+            options.throwHttpErrors = false;
 
-        const response = await ky(endpoint, options);
-        const responseData = await parseResponseData(response);
+            const response = await ky(endpoint, options);
+            const responseData = await parseResponseData(response);
 
-        if (!response.ok) {
-            const errorBody = typeof responseData === "string" ? responseData : JSON.stringify(responseData);
-            const errorBodyMessage = errorBody ? ` Response body: ${errorBody}` : "";
-            throw new Error(
-                `HTTP request node failed for ${method} ${endpoint}: ${response.status} ${response.statusText}.${errorBodyMessage}`,
-            );
-        }
-
-        const responsePayload = {
-            httpResponse: {
-                status: response.status,
-                statusText: response.statusText,
-                data: responseData,
+            if (!response.ok) {
+                const errorBody = typeof responseData === "string" ? responseData : JSON.stringify(responseData);
+                const errorBodyMessage = errorBody ? ` Response body: ${errorBody}` : "";
+                throw new Error(
+                    `HTTP request node failed for ${method} ${endpoint}: ${response.status} ${response.statusText}.${errorBodyMessage}`,
+                );
             }
-        }
-        return {
-            ...context,
-            [data.variableName]: responsePayload,
-        }
 
-    });
+            const responsePayload = {
+                httpResponse: {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: responseData,
+                }
+            }
+            return {
+                ...context,
+                [data.variableName]: responsePayload,
+            }
+        });
 
-    // TODO: publish "success" state for manual trigger
-    return result;
+        await publish(
+            httpRequestChannel().status({
+                nodeId,
+                status: "success"
+            })
+        )
+        return result;
+
+    } catch (error) {
+        await publish(
+            httpRequestChannel().status({
+                nodeId,
+                status: "error"
+            })
+        )
+
+        throw error;
+    }
 }
