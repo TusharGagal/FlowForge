@@ -3,11 +3,20 @@ import prisma from "@/lib/db";
 import { topologicalSort } from "./utils";
 import { NodeType } from "@/generated/prisma/enums";
 import { getExecutor } from "@/app/features/executions/lib/executor-registry";
+import { httpRequestChannel } from "./channels/httpRequestChannel";
 
 export const executeWorkflow = inngest.createFunction(
-  { id: "execute-workflow" },
-  { event: "workflows/execute.workflow" },
-  async ({ event, step }) => {
+  {
+    id: "execute-workflow",
+    retries: 0 //Todo: need to remove in production 
+  },
+  {
+    event: "workflows/execute.workflow",
+    channels: [
+      httpRequestChannel(),
+    ]
+  },
+  async ({ event, step, publish }) => {
     const workflowId = event.data.workflowId;
 
     const sortedNodes = await step.run("prepare-workflow", async () => {
@@ -30,7 +39,8 @@ export const executeWorkflow = inngest.createFunction(
         data: node.data as Record<string, unknown>,
         nodeId: node.id,
         context,
-        step
+        step,
+        publish,
       })
     }
 
