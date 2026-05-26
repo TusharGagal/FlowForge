@@ -9,19 +9,31 @@ export const GoogleFormTriggerExecutor: NodeExecutor<GoogleFormTriggerData> = as
     step,
     publish
 }) => {
-    await publish(
-        googleFormTriggerChannel().status({
-            nodeId,
-            status: "loading"
-        })
-    )
-    const result = await step.run("google-form-trigger", async () => context);
+    try {
 
-    await publish(
-        googleFormTriggerChannel().status({
-            nodeId,
-            status: "success"
-        })
-    )
-    return result;
+        await publish(
+            googleFormTriggerChannel().status({
+                nodeId,
+                status: "loading"
+            })
+        )
+        const result = await step.run("google-form-trigger", async () => context);
+
+        await publish(
+            googleFormTriggerChannel().status({
+                nodeId,
+                status: "success"
+            })
+        )
+        return result;
+    }
+    catch (error) {
+        await publish(
+            googleFormTriggerChannel().status({
+                nodeId,
+                status: "error"
+            })
+        )
+        throw error;
+    }
 }

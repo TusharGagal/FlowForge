@@ -25,7 +25,7 @@ export const GoogleFormTriggerDialog = ({ open, onOpenChange }: props) => {
     const workflowId = params.workflowId as string;
 
     // construct webhook url
-    const baseURL = process.env.NEXT_PUBLIC_APP_URL || "https://localhost:3000";
+    const baseURL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const webhookURL = `${baseURL}/api/webhook/google-form?workflowId=${workflowId}`;
 
     const copyToClipboard = async () => {
@@ -71,7 +71,7 @@ export const GoogleFormTriggerDialog = ({ open, onOpenChange }: props) => {
                             <li>Click the Three dots menu → Script editor </li>
                             <li>Copy and paste the script below</li>
                             <li>Replace WEBHOOK_URL with your webhook URL above</li>
-                            <li>Save and click &ldquo;Triggers&ldquo; → Add Trigger </li>
+                            <li>Save and click &ldquo;Triggers&rdquo; → Add Trigger </li>
                             <li>Choose: From form → On form submit → save </li>
                         </ol>
                     </div>
