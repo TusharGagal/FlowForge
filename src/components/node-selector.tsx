@@ -56,6 +56,24 @@ const executionNodes: NodeTypeOption[] = [
         label: "HTTP Request",
         description: "Makes an HTTP request",
         icon: GlobeIcon,
+    },
+    {
+        type: NodeType.GEMINI,
+        label: "Gemini",
+        description: "Generate text and data with Google Gemini.",
+        icon: "/logos/gemini.svg",
+    },
+    {
+        type: NodeType.OPENAI,
+        label: "Open AI",
+        description: "Execute AI tasks and generate text with OpenAI.",
+        icon: "/logos/openai.svg",
+    },
+    {
+        type: NodeType.ANTHROPIC,
+        label: "Anthropic",
+        description: "Generate high-quality text and content using Claude.",
+        icon: "/logos/anthropic.svg",
     }
 ];
 
@@ -150,7 +168,7 @@ export function NodeSelector({ open, onOpenChange, children }: NodeSelectorProps
                             <div key={nodeType.type} className="w-full justify-start h-auto py-5 px-4 rounded-none cursor-pointer border-l-2 border-transparent hover:border-l-primary" onClick={() => handleNodeSelect(nodeType)}>
                                 <div className="flex items-center gap-6 w-full overflow-hidden">
                                     {typeof Icon === "string" ? (
-                                        <Image src={Icon} alt={nodeType.label} className="size-5 object-contain rounded-sm" />
+                                        <Image src={Icon} alt={nodeType.label} width={20} height={20} className="size-5 object-contain rounded-sm" />
                                     ) : (
                                         <Icon className="size-5" />
                                     )}

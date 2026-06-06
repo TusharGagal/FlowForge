@@ -32,6 +32,15 @@ import { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
+export const AVAILABLE_MODELS = [
+    "claude-opus-4-8",
+    "claude-opus-4-7",
+    "claude-opus-4-6",
+    "claude-sonnet-4-6",
+    "claude-opus-4-5",
+    "claude-haiku-4-5"
+] as const;
+
 
 const formSchema = z.object({
     variableName: z
@@ -40,21 +49,21 @@ const formSchema = z.object({
         .regex(/^[A-Za-z_$][A-Za-z0-9_$]*$/, {
             message: "Variable name should start with a letter or underscore and contains only letter, number, and underscore."
         }),
-    endpoint: z.string().min(1, { message: "Endpoint URL is required" }),
-    method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
-    body: z.string().optional()
+    model: z.string().min(1, "Model is required"),
+    systemPrompt: z.string().optional(),
+    userPrompt: z.string().min(1, "User propmt is required")
 })
 
-export type HttpRequestFormValues = z.infer<typeof formSchema>;
+export type AnthropicFormValues = z.infer<typeof formSchema>;
 
 interface props {
     open: boolean;
     onOpenChange: (open: boolean) => void
-    onSubmit: (values: HttpRequestFormValues) => void;
-    defaultValues?: Partial<HttpRequestFormValues>;
+    onSubmit: (values: AnthropicFormValues) => void;
+    defaultValues?: Partial<AnthropicFormValues>;
 }
 
-export const HttpRequestDialog = (
+export const AnthropicDialog = (
     {
         open,
         onOpenChange,
@@ -66,9 +75,9 @@ export const HttpRequestDialog = (
         resolver: zodResolver(formSchema),
         defaultValues: {
             variableName: defaultValues.variableName,
-            endpoint: defaultValues.endpoint || "",
-            method: defaultValues.method || "GET",
-            body: defaultValues.body || "",
+            model: defaultValues.model || AVAILABLE_MODELS[0],
+            systemPrompt: defaultValues.systemPrompt || "",
+            userPrompt: defaultValues.userPrompt || "",
         }
 
     })
@@ -76,10 +85,10 @@ export const HttpRequestDialog = (
     useEffect(() => {
         if (open) {
             form.reset({
-                variableName: defaultValues.variableName || "",
-                endpoint: defaultValues.endpoint || "",
-                method: defaultValues.method || "GET",
-                body: ['POST', 'PUT', 'PATCH'].includes(defaultValues.method || "GET") ? (defaultValues.body || "") : "",
+                variableName: defaultValues.variableName,
+                model: defaultValues.model || AVAILABLE_MODELS[0],
+                systemPrompt: defaultValues.systemPrompt || "",
+                userPrompt: defaultValues.userPrompt || "",
 
             })
         }
@@ -88,12 +97,7 @@ export const HttpRequestDialog = (
     const watchVariableName = useWatch({
         control: form.control,
         name: 'variableName'
-    }) || "myApiCall";
-    const watchMethod = useWatch({
-        control: form.control,
-        name: 'method',
-    });
-    const showBodyField = ['POST', 'PUT', 'PATCH'].includes(watchMethod);
+    }) || "myAnthropic";
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
         onSubmit(values);
@@ -107,10 +111,11 @@ export const HttpRequestDialog = (
                     scrollbarWidth: "none",
                     msOverflowStyle: "none",
                 }}
-            >                <DialogHeader>
-                    <DialogTitle>HTTP Request</DialogTitle>
+            >
+                <DialogHeader>
+                    <DialogTitle>Anthropic Configurations</DialogTitle>
                     <DialogDescription>
-                        Configure the setting for HTTP Request node.
+                        Configure the AI model and prompts for this node.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -126,13 +131,13 @@ export const HttpRequestDialog = (
                                     <FormLabel>Variable Name</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="myApiCall"
+                                            placeholder="myAnthropic"
                                             {...field}
                                         />
                                     </FormControl>
                                     <FormDescription>
                                         Use this name to refer the results in other nodes:{" "}
-                                        {`{{${watchVariableName}.httpResponse.data}}`}
+                                        {`{{${watchVariableName}.text}}`}
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -140,29 +145,30 @@ export const HttpRequestDialog = (
                         />
                         <FormField
                             control={form.control}
-                            name='method'
+                            name='model'
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Method</FormLabel>
+                                    <FormLabel>Model</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         defaultValue={field.value}
                                     >
                                         <FormControl>
                                             <SelectTrigger className='w-full'>
-                                                <SelectValue placeholder="Select a method" />
+                                                <SelectValue placeholder="Select a model" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value='GET'>GET</SelectItem>
-                                            <SelectItem value='POST'>POST</SelectItem>
-                                            <SelectItem value='PUT'>PUT</SelectItem>
-                                            <SelectItem value='PATCH'>PATCH</SelectItem>
-                                            <SelectItem value='DELETE'>DELETE</SelectItem>
+                                            {AVAILABLE_MODELS.map((model) => (
+                                                <SelectItem key={model} value={model}>
+                                                    {model}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
+
                                     </Select>
                                     <FormDescription>
-                                        The HTTP method to use for this request.
+                                        The Anthropic model to use for completion.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -170,47 +176,44 @@ export const HttpRequestDialog = (
                         />
                         <FormField
                             control={form.control}
-                            name='endpoint'
+                            name='systemPrompt'
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Endpoint URL</FormLabel>
+                                    <FormLabel>System Prompt (Optional)</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            placeholder="https://api/example.com/users/{{httpResponse.data.id}}"
+                                        <Textarea
+                                            placeholder="You are a helpfull assistant."
+                                            className="min-h-[80px] font-mono text-sm"
                                             {...field}
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        Static URL or use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects.
+                                        Sets the behaviour of the assistance. Use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        {showBodyField && (
-                            <FormField
-                                control={form.control}
-                                name='body'
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Request Body</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder={
-                                                    `{\n "userId":"{{httpsResponse.data.id}}", \n "name":"{{httpsResponse.data.name}}",\n "items":"{{httpResponse.data.items}}"\n}`
-                                                }
-                                                className="min-h-[120px] font-mono text-sm"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormDescription>
-                                            JSON with template variables. Use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        )}
+                        <FormField
+                            control={form.control}
+                            name='userPrompt'
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>User Prompt</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Summarize the text: {{json httpResponse.data}}}"
+                                            className="min-h-[120px] font-mono text-sm"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        The propmt to send to the AI. Use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <DialogFooter className='mt-4'>
                             <Button type='submit'>Save</Button>
                         </DialogFooter>

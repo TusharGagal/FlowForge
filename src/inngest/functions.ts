@@ -7,6 +7,7 @@ import { httpRequestChannel } from "./channels/httpRequestChannel";
 import { manualTriggerChannel } from "./channels/manualTriggerChannel";
 import { googleFormTriggerChannel } from "./channels/googleFormTriggerChannel";
 import { stripeTriggerChannel } from "./channels/stripeTriggerChannel";
+import { geminiChannel } from "./channels/geminiChannel";
 
 export const executeWorkflow = inngest.createFunction(
   {
@@ -19,7 +20,8 @@ export const executeWorkflow = inngest.createFunction(
       httpRequestChannel(),
       manualTriggerChannel(),
       googleFormTriggerChannel(),
-      stripeTriggerChannel()
+      stripeTriggerChannel(),
+      geminiChannel()
     ]
   },
   async ({ event, step, publish }) => {
