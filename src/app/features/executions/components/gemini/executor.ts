@@ -63,7 +63,15 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({
     // TODO: Fetch credentials that are user selected.
 
     const credentialValue = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
-
+    if (!credentialValue) {
+        await publish(
+            geminiChannel().status({
+                nodeId,
+                status: "error"
+            })
+        );
+        throw new NonRetriableError("Gemini node: GOOGLE_GENERATIVE_AI_API_KEY environment variable is not set.");
+    }
     const google = createGoogleGenerativeAI({
         apiKey: credentialValue,
     });
@@ -84,9 +92,14 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({
             },
         );
 
-        const text = steps[0].content[0].type === "text"
-            ? steps[0].content[0].text
-            : ""
+        const text =
+            steps?.[0]?.content?.[0]?.type === "text"
+                ? steps[0].content[0].text
+                : "";
+
+        if (!text && steps?.[0]?.content?.length === 0) {
+            throw new Error("Gemini API returned empty response");
+        }
 
         await publish(
             geminiChannel().status({

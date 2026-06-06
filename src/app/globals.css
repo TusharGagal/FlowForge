@@ -189,11 +189,3 @@
     cursor: pointer;
   }
 }
-
-::-webkit-scrollbar {
-  width: 20px !important;
-}
-
-::-webkit-scrollbar-thumb {
-  background: red !important;
-}

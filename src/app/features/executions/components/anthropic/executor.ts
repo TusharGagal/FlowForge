@@ -63,7 +63,15 @@ export const AnthropicExecutor: NodeExecutor<AnthropicData> = async ({
     // TODO: Fetch credentials that are user selected.
 
     const credentialValue = process.env.ANTHROPIC_API_KEY!;
-
+    if (!credentialValue) {
+        await publish(
+            anthropicChannel().status({
+                nodeId,
+                status: "error"
+            })
+        );
+        throw new NonRetriableError("Anthropic node: API key is missing from environment variables.");
+    }
     const anthropic = createAnthropic({
         apiKey: credentialValue,
     });
@@ -84,9 +92,15 @@ export const AnthropicExecutor: NodeExecutor<AnthropicData> = async ({
             },
         );
 
-        const text = steps[0].content[0].type === "text"
-            ? steps[0].content[0].text
-            : ""
+        const text =
+            steps?.[0]?.content?.[0]?.type === "text"
+                ? steps[0].content[0].text
+                : "";
+
+        if (!text && steps?.[0]?.content?.length === 0) {
+            throw new Error("Anthropic API returned empty response");
+        }
+
 
         await publish(
             anthropicChannel().status({

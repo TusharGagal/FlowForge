@@ -63,7 +63,15 @@ export const OpenAiExecutor: NodeExecutor<OpenAiData> = async ({
     // TODO: Fetch credentials that are user selected.
 
     const credentialValue = process.env.OPENAI_API_KEY!;
-
+    if (!credentialValue) {
+        await publish(
+            openAiChannel().status({
+                nodeId,
+                status: "error"
+            })
+        );
+        throw new NonRetriableError("OpenAI node: API key is missing from environment variables.");
+    }
     const openai = createOpenAI({
         apiKey: credentialValue,
     });
@@ -84,10 +92,14 @@ export const OpenAiExecutor: NodeExecutor<OpenAiData> = async ({
             },
         );
 
-        const text = steps[0].content[0].type === "text"
-            ? steps[0].content[0].text
-            : ""
+        const text =
+            steps?.[0]?.content?.[0]?.type === "text"
+                ? steps[0].content[0].text
+                : "";
 
+        if (!text && steps?.[0]?.content?.length === 0) {
+            throw new Error("OpenAI API returned empty response");
+        }
         await publish(
             openAiChannel().status({
                 nodeId,

@@ -1,6 +1,6 @@
 import { channel, topic } from "@inngest/realtime"
 
-export const ANTHROPIC_CHANNEL_NAME = "gemini-execution";
+export const ANTHROPIC_CHANNEL_NAME = "anthropic-execution";
 
 export const anthropicChannel = channel(ANTHROPIC_CHANNEL_NAME)
     .addTopic(
