@@ -4,6 +4,7 @@ import { createAnthropic } from "@ai-sdk/anthropic"
 import { generateText } from "ai";
 import { NonRetriableError } from "inngest";
 import { anthropicChannel } from "@/inngest/channels/anthropicChannel";
+import prisma from "@/lib/db";
 
 Handlebars.registerHelper("json", (context) => {
     const jsonString = JSON.stringify(context, null, 2);
@@ -14,6 +15,7 @@ Handlebars.registerHelper("json", (context) => {
 
 export type AnthropicData = {
     variableName?: string,
+    credentialId?: string,
     model?: string;
     systemPrompt?: string;
     userPrompt?: string;
@@ -24,6 +26,7 @@ export const AnthropicExecutor: NodeExecutor<AnthropicData> = async ({
     data,
     nodeId,
     context,
+    userId,
     step,
     publish
 }) => {
@@ -43,6 +46,15 @@ export const AnthropicExecutor: NodeExecutor<AnthropicData> = async ({
         )
         throw new NonRetriableError("Anthropic node: Variable name is missing.")
     }
+    if (!data.credentialId) {
+        await publish(
+            anthropicChannel().status({
+                nodeId,
+                status: "error"
+            })
+        )
+        throw new NonRetriableError("Anthropic node: Credential is required.")
+    }
     if (!data.userPrompt) {
         await publish(
             anthropicChannel().status({
@@ -53,27 +65,34 @@ export const AnthropicExecutor: NodeExecutor<AnthropicData> = async ({
         throw new NonRetriableError("Anthropic node: user prompt is missing.")
     }
 
-    // TODO: throw if credential is missing
 
     const systemPrompt = data.systemPrompt
         ? Handlebars.compile(data.systemPrompt)(context)
         : "You are a helpful assistance";
     const userPrompt = Handlebars.compile(data.userPrompt)(context);
 
-    // TODO: Fetch credentials that are user selected.
 
-    const credentialValue = process.env.ANTHROPIC_API_KEY!;
-    if (!credentialValue) {
+    const credential = await step.run("get-credential", () => {
+        return prisma.credential.findUnique({
+            where: {
+                id: data.credentialId,
+                userId,
+            }
+        })
+    })
+
+    if (!credential) {
         await publish(
             anthropicChannel().status({
                 nodeId,
                 status: "error"
             })
         );
-        throw new NonRetriableError("Anthropic node: API key is missing from environment variables.");
+        throw new NonRetriableError("Anthropic Node: Credential Not found");
     }
+
     const anthropic = createAnthropic({
-        apiKey: credentialValue,
+        apiKey: credential.value,
     });
 
     try {
