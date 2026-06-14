@@ -185,7 +185,12 @@ export const AnthropicDialog = (
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
-
+                                        {!credentials?.length &&
+                                            <FormDescription>
+                                                There is no credential available for Anthropic.
+                                                Please create an Anthropic credential.
+                                            </FormDescription>
+                                        }
                                     </Select>
                                     <FormMessage />
                                 </FormItem>

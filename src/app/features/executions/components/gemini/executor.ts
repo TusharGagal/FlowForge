@@ -26,6 +26,7 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({
     data,
     nodeId,
     context,
+    userId,
     step,
     publish
 }) => {
@@ -73,6 +74,7 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({
         return prisma.credential.findUnique({
             where: {
                 id: data.credentialId,
+                userId,
             }
         })
     })

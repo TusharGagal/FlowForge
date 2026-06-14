@@ -185,7 +185,12 @@ export const GeminiDialog = (
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
-
+                                        {!credentials?.length &&
+                                            <FormDescription>
+                                                There is no credential available for Gemini.
+                                                Please create an Gemini credential.
+                                            </FormDescription>
+                                        }
                                     </Select>
                                     <FormMessage />
                                 </FormItem>

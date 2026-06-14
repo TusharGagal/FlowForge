@@ -186,7 +186,12 @@ export const OpenAiDialog = (
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
-
+                                        {!credentials?.length &&
+                                            <FormDescription>
+                                                There is no credential available for OpenAI.
+                                                Please create an OpenAI credential.
+                                            </FormDescription>
+                                        }
                                     </Select>
 
                                     <FormMessage />
