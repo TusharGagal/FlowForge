@@ -8,16 +8,18 @@ export const credentialsRouter = createTRPCRouter({
     create: protectedProcedure.input
         (z.object({
             name: z.string().min(1, "Name is required"),
-            value: z.string().min(1, "Value is required"),
+            apiKey: z.string().min(1, "Value is required"),
             type: z.nativeEnum(CredentialType)
         })).mutation(({ ctx, input }) => {
-            const { name, value, type } = input;
+            const { name, apiKey, type } = input;
             return prisma.credential.create({
                 data: {
                     name,
                     userId: ctx.auth.user.id,
                     type,
-                    value, //TODO: Encrypt values in production
+                    config: {
+                        apiKey,
+                    }, //TODO: Encrypt values in production
                 }
             });
         }),
@@ -34,15 +36,17 @@ export const credentialsRouter = createTRPCRouter({
             id: z.string(),
             name: z.string().min(1, "Name is required"),
             type: z.nativeEnum(CredentialType),
-            value: z.string().min(1, "Value is required"),
+            apiKey: z.string().min(1, "Value is required"),
         })).mutation(async ({ ctx, input }) => {
-            const { id, name, type, value } = input;
+            const { id, name, type, apiKey } = input;
             return prisma.credential.update({
                 where: { id, userId: ctx.auth.user.id },
                 data: {
                     name,
                     type,
-                    value, //TODO: Encrypt values in production
+                    config: {
+                        apiKey,
+                    }, //TODO: Encrypt values in production
                 }
             })
         }),

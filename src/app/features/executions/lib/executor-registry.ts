@@ -8,6 +8,9 @@ import { StripeTriggerExecutor } from "../../triggers/components/stripe-trigger/
 import { GeminiData, GeminiExecutor } from "../components/gemini/executor";
 import { AnthropicData, AnthropicExecutor } from "../components/anthropic/executor";
 import { OpenAiData, OpenAiExecutor } from "../components/openAI/executor";
+import { DiscordData, DiscordExecutor } from "../components/discord/executor";
+import { SlackData, SlackExecutor } from "../components/slack/executor";
+import { GmailData, GmailExecutor } from "../components/gmail/executor";
 
 
 type NodeDataMap = {
@@ -19,7 +22,9 @@ type NodeDataMap = {
     [NodeType.GEMINI]: GeminiData,
     [NodeType.ANTHROPIC]: AnthropicData,
     [NodeType.OPENAI]: OpenAiData,
-
+    [NodeType.DISCORD]: DiscordData,
+    [NodeType.SLACK]: SlackData,
+    [NodeType.GMAIL]: GmailData,
 }
 
 export const executorRegistry: { [K in NodeType]: NodeExecutor<NodeDataMap[K]> } = {
@@ -31,7 +36,9 @@ export const executorRegistry: { [K in NodeType]: NodeExecutor<NodeDataMap[K]> }
     [NodeType.GEMINI]: GeminiExecutor,
     [NodeType.ANTHROPIC]: AnthropicExecutor,
     [NodeType.OPENAI]: OpenAiExecutor,
-
+    [NodeType.DISCORD]: DiscordExecutor,
+    [NodeType.SLACK]: SlackExecutor,
+    [NodeType.GMAIL]: GmailExecutor,
 }
 
 export const getExecutor = <T extends NodeType>(type: T): NodeExecutor<NodeDataMap[T]> => {

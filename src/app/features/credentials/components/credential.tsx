@@ -4,7 +4,7 @@ import { CredentialType } from "@/generated/prisma/enums";
 import Image from "next/image"
 import { useRouter } from "next/navigation";
 import { useCreateCredential, useUpdateCredential, useSuspenseCredential } from "../hooks/useCredentials";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import {
@@ -37,8 +37,8 @@ import Link from "next/link";
 
 const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
-    type: z.nativeEnum(CredentialType),
-    value: z.string().min(1, "API key is required"),
+    type: z.enum(CredentialType),
+    apiKey: z.string().min(1, "API key is required"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -58,15 +58,41 @@ const credentialTypeOptions = [
         value: CredentialType.GEMINI,
         label: "Gemini",
         logo: "/logos/gemini.svg"
+    },
+    {
+        value: CredentialType.GMAIL,
+        label: "Gmail",
+        logo: "/logos/gmail.svg"
     }
+
 ]
+
+export const credentialConfig = {
+    [CredentialType.OPENAI]: {
+        authType: "API_KEY",
+        label: "API Key",
+    },
+    [CredentialType.ANTHROPIC]: {
+        authType: "API_KEY",
+        label: "API Key",
+    },
+    [CredentialType.GEMINI]: {
+        authType: "API_KEY",
+        label: "API Key",
+    },
+    [CredentialType.GMAIL]: {
+        authType: "OAUTH",
+        provider: "Google",
+    },
+};
+
 
 interface CredentialFormProps {
     initialData?: {
         id?: string;
         name: string;
         type: CredentialType;
-        value: string;
+        apiKey: string;
     };
 };
 
@@ -83,7 +109,7 @@ export const CredentialForm = ({
         defaultValues: initialData || {
             name: "",
             type: CredentialType.OPENAI,
-            value: ""
+            apiKey: ""
         }
     });
 
@@ -112,6 +138,12 @@ export const CredentialForm = ({
             })
         }
     }
+
+    const selectedType = useWatch({
+        control: form.control,
+        name: 'type'
+    });
+    const config = credentialConfig[selectedType];
 
     return (
         <>
@@ -160,6 +192,7 @@ export const CredentialForm = ({
                                             <SelectContent>
                                                 {credentialTypeOptions.map((option) => (
                                                     <SelectItem
+                                                        disabled={isEdit}
                                                         key={option.value}
                                                         value={option.value}
                                                     >
@@ -181,21 +214,39 @@ export const CredentialForm = ({
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="value"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>value</FormLabel>
-                                        <FormControl>
-                                            <Input type="password"
-                                                placeholder="sk-..." {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            {config.authType === "API_KEY" ? (
+                                <FormField
+                                    control={form.control}
+                                    name="apiKey"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>API Key</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="password"
+                                                    placeholder="sk-..."
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            ) : (
+                                <div className="space-y-2">
+                                    <FormLabel>Connected Account</FormLabel>
+
+                                    <Input
+                                        disabled
+                                        value={initialData?.name ?? "Not Connected"}
+                                    />
+
+                                    <p className="text-sm text-muted-foreground">
+                                        This credential uses OAuth authentication.
+                                    </p>
+                                </div>
+                            )}
+
                             <div className="flex gap-4">
                                 <Button
                                     type="submit"
@@ -235,5 +286,10 @@ export const CredentialView = ({
 }: { credentialId: string }) => {
     const { data: credential } = useSuspenseCredential(credentialId);
 
-    return <CredentialForm initialData={credential} />
+    return <CredentialForm initialData={{
+        id: credential.id,
+        name: credential.name,
+        type: credential.type,
+        apiKey: (credential.config as { apiKey: string }).apiKey,
+    }} />
 }

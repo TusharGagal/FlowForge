@@ -91,8 +91,11 @@ export const AnthropicExecutor: NodeExecutor<AnthropicData> = async ({
         throw new NonRetriableError("Anthropic Node: Credential Not found");
     }
 
+    const config = credential.config as {
+        apiKey: string;
+    };
     const anthropic = createAnthropic({
-        apiKey: credential.value,
+        apiKey: config.apiKey,
     });
 
     try {

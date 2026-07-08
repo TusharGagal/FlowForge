@@ -90,8 +90,12 @@ export const OpenAiExecutor: NodeExecutor<OpenAiData> = async ({
         );
         throw new NonRetriableError("OpenAi Node: Credential Not found");
     }
+
+    const config = credential.config as {
+        apiKey: string;
+    };
     const openai = createOpenAI({
-        apiKey: credential.value,
+        apiKey: config.apiKey,
     });
 
     try {

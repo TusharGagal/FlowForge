@@ -81,7 +81,7 @@ model Verification {
 model Credential {
   id        String         @id @default(cuid())
   name      String
-  value     String
+  config    Json
   type      CredentialType
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
@@ -96,6 +96,7 @@ enum CredentialType {
   ANTHROPIC
   OPENAI
   GEMINI
+  GMAIL
 }
 
 model Workflow {
@@ -120,6 +121,9 @@ enum NodeType {
   ANTHROPIC
   GEMINI
   OPENAI
+  DISCORD
+  SLACK
+  GMAIL
 }
 
 model Node {
