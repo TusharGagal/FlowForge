@@ -74,7 +74,26 @@ const executionNodes: NodeTypeOption[] = [
         label: "Anthropic",
         description: "Generate high-quality text and content using Claude.",
         icon: "/logos/anthropic.svg",
-    }
+    },
+    {
+        type: NodeType.DISCORD,
+        label: "Discord",
+        description: "Send automated alerts and updates to your Discord channels.",
+        icon: "/logos/discord.svg",
+    },
+    {
+        type: NodeType.SLACK,
+        label: "Slack",
+        description: "Send automated messages and notifications to your Slack workspaces.",
+        icon: "/logos/slack.svg",
+    },
+    {
+        type: NodeType.GMAIL,
+        label: "Gmail",
+        description: "Send automated emails, alerts, and notifications directly from your Gmail account.",
+        icon: "/logos/gmail.svg",
+    },
+
 ];
 
 interface NodeSelectorProps {
