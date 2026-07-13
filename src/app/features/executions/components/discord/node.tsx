@@ -9,6 +9,7 @@ import { DISCORD_CHANNEL_NAME } from "@/inngest/channels/discordChannel";
 
 
 type DiscordNodeData = {
+    variableName?: string;
     webhookUrl?: string;
     content?: string;
     username?: string

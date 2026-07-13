@@ -46,13 +46,20 @@ export const SlackExecutor: NodeExecutor<SlackData> = async ({
     }
 
 
-    const rawContent = Handlebars.compile(data.content)(context);
-    const content = decode(rawContent);
-
-
     try {
+        const rawContent = Handlebars.compile(data.content)(context);
+        const content = decode(rawContent);
 
         const result = await step.run("slack-webhook", async () => {
+            if (!data.variableName) {
+                await publish(
+                    slackChannel().status({
+                        nodeId,
+                        status: "error"
+                    })
+                )
+                throw new NonRetriableError("Slack node: variable name is required.")
+            }
             if (!data.webhookUrl) {
                 await publish(
                     slackChannel().status({
@@ -82,15 +89,7 @@ export const SlackExecutor: NodeExecutor<SlackData> = async ({
                 json: payload,
             });
 
-            if (!data.variableName) {
-                await publish(
-                    slackChannel().status({
-                        nodeId,
-                        status: "error"
-                    })
-                )
-                throw new NonRetriableError("Slack node: variable name is required.")
-            }
+
 
             return {
                 ...context,

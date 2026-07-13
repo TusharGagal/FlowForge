@@ -290,6 +290,6 @@ export const CredentialView = ({
         id: credential.id,
         name: credential.name,
         type: credential.type,
-        apiKey: (credential.config as { apiKey: string }).apiKey,
+        apiKey: (credential.config as { apiKey: string }).apiKey ?? " ",
     }} />
 }

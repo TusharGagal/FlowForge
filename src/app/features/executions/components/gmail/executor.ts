@@ -173,18 +173,18 @@ export const GmailExecutor: NodeExecutor<GmailData> = async ({
                 // ----------------------------
                 // Build MIME Email
                 // ----------------------------
+                const sanitizeHeader = (value: string) => value.replace(/[\r\n]/g, "");
 
                 const message = [
-                    `To: ${to}`,
-                    ...(cc ? [`Cc: ${cc}`] : []),
+                    `To: ${sanitizeHeader(to)}`,
+                    ...(cc ? [`Cc: ${sanitizeHeader(cc)}`] : []),
                     "MIME-Version: 1.0",
                     "Content-Type: text/html; charset=UTF-8",
-                    `Subject: ${subject}`,
-                    "",
+                    `Subject: ${sanitizeHeader(subject)}`, "",
                     body,
                 ].join("\r\n");
 
-                console.log(message);
+
                 // ----------------------------
                 // Base64URL Encode
                 // ----------------------------

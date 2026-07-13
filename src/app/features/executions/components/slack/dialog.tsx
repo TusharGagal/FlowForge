@@ -155,7 +155,7 @@ export const SlackDialog = (
                             name='payloadKey'
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Webhook URL</FormLabel>
+                                    <FormLabel>Payload Key</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder='text'
