@@ -24,6 +24,7 @@ export const executeWorkflow = inngest.createFunction(
         where: { inngestEventId: event.data.event.id },
         data: {
           status: ExecutionStatus.FAILED,
+          completedAt: new Date(),
           error: event.data.error.message,
           errorStack: event.data.error.stack,
         }

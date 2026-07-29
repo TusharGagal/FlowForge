@@ -8,15 +8,15 @@ const Page = async () => {
     await requireAuth();
 
     return (
-        <ExecutionsContainer>
-            <HydrateClient>
+        <HydrateClient>
+            <ExecutionsContainer>
                 <ErrorBoundary fallback={<ExecutionsError />}>
                     <Suspense fallback={<ExecutionsLoading />}>
                         <ExecutionsList />
                     </Suspense>
                 </ErrorBoundary>
-            </HydrateClient>
-        </ExecutionsContainer>
+            </ExecutionsContainer>
+        </HydrateClient>
     )
 };
 

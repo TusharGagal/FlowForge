@@ -117,8 +117,9 @@ export const ExecutionView = ({
                                 open={showStackTrace}
                                 onOpenChange={setShowStackTrace}
                             >
-                                <CollapsibleTrigger>
+                                <CollapsibleTrigger asChild>
                                     <Button
+                                        // asChild
                                         variant="ghost"
                                         size="sm"
                                         className="text-red-900 hover:bg-red-100"
@@ -141,7 +142,7 @@ export const ExecutionView = ({
                     </div>
 
                 )}
-                {execution.output && (
+                {execution.output !== null && (
                     <div className="mt-6 p-4 bg-muted rounded-md">
                         <p className="text-sm font-medium mb-2">Output</p>
                         <pre className="text-xs font-mono overflow-auto">
