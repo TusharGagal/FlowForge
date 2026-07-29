@@ -1,11 +1,22 @@
+import { ExecutionsContainer, ExecutionsError, ExecutionsList, ExecutionsLoading } from "@/app/features/executions/components/Executions";
 import { requireAuth } from "@/lib/auth-utils";
+import { HydrateClient } from "@/trpc/server";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
- const Page= async ()=>{
+const Page = async () => {
     await requireAuth();
+
     return (
-        <div className="p-6">
-            <h1 className="text-foreground">Execution Page</h1>
-        </div>
+        <HydrateClient>
+            <ExecutionsContainer>
+                <ErrorBoundary fallback={<ExecutionsError />}>
+                    <Suspense fallback={<ExecutionsLoading />}>
+                        <ExecutionsList />
+                    </Suspense>
+                </ErrorBoundary>
+            </ExecutionsContainer>
+        </HydrateClient>
     )
 };
 
