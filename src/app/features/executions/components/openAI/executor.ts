@@ -5,6 +5,7 @@ import { generateText } from "ai";
 import { NonRetriableError } from "inngest";
 import { openAiChannel } from "@/inngest/channels/openAiChannel";
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 Handlebars.registerHelper("json", (context) => {
     const jsonString = JSON.stringify(context, null, 2);
@@ -95,7 +96,7 @@ export const OpenAiExecutor: NodeExecutor<OpenAiData> = async ({
         apiKey: string;
     };
     const openai = createOpenAI({
-        apiKey: config.apiKey,
+        apiKey: decrypt(config.apiKey),
     });
 
     try {
