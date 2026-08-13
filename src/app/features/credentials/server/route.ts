@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import z from "zod/v3";
 import { PAGINATION } from "@/config/constants";
 import { CredentialType } from "@/generated/prisma/enums";
+import { encrypt } from "@/lib/encryption";
 
 export const credentialsRouter = createTRPCRouter({
     create: protectedProcedure.input
@@ -18,8 +19,8 @@ export const credentialsRouter = createTRPCRouter({
                     userId: ctx.auth.user.id,
                     type,
                     config: {
-                        apiKey,
-                    }, //TODO: Encrypt values in production
+                        apiKey: encrypt(apiKey),
+                    },
                 }
             });
         }),
@@ -45,8 +46,8 @@ export const credentialsRouter = createTRPCRouter({
                     name,
                     type,
                     config: {
-                        apiKey,
-                    }, //TODO: Encrypt values in production
+                        apiKey: encrypt(apiKey),
+                    },
                 }
             })
         }),
